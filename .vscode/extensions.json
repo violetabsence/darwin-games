@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "msjsdiag.debugger-for-chrome",
+        "dbaeumer.vscode-eslint",
+        "streetsidesoftware.code-spell-checker",
+        "gruntfuggly.todo-tree"
+    ]
+}

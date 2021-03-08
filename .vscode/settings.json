@@ -1,0 +1,18 @@
+{
+    "cSpell.ignoreWords": [
+        "Hsts",
+        "browserslist",
+        "flowtype",
+        "linebreak",
+        "comlink"
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
+    },
+    "files.eol": "\n",
+    "cSpell.words": [
+        "Hopfield",
+        "Perceptron",
+        "dnci"
+    ]
+}

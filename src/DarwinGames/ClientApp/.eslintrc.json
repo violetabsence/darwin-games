@@ -1,0 +1,82 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "react-app",
+        "google"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "require-jsdoc": "off",
+        "indent": ["warn", 4, {
+            "SwitchCase": 1
+        }],
+        "object-curly-spacing": ["warn", "always"],
+        "max-len": [
+            "warn",
+            120
+        ],
+        "quotes": [
+            "warn",
+            "double"
+        ],
+        "operator-linebreak": ["warn", "before"],
+        "switch-colon-spacing": ["warn", {"after": true, "before": false}],
+        "sort-imports": [
+            "off",
+            {
+                "ignoreCase": false,
+                "ignoreDeclarationSort": true,
+                "ignoreMemberSort": false,
+                "memberSyntaxSortOrder": [
+                    "none",
+                    "all",
+                    "multiple",
+                    "single"
+                ],
+                "allowSeparatedGroups": false
+            }
+        ],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "react/display-name": "off",
+        "import/order": [
+            "error",
+            {
+              "groups": ["builtin", "external", "internal"],
+              "pathGroups": [
+                {
+                  "pattern": "react",
+                  "group": "external",
+                  "position": "before"
+                },
+                {
+                    "pattern": "external",
+                    "group": "internal",
+                    "position": "before"
+                  }
+              ],
+              "pathGroupsExcludedImportTypes": ["react", "external"],
+              "newlines-between": "always",
+              "alphabetize": {
+                "order": "asc",
+                "caseInsensitive": true
+              }
+            }
+        ]
+    }
+}
