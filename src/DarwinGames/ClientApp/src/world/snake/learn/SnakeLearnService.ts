@@ -1,6 +1,6 @@
 import * as Comlink from "comlink";
 /* eslint-disable import/no-webpack-loader-syntax */
-import Worker from "worker-loader!./worker";
+import Worker from "worker-loader!../../../worker";
 
 import {
     GenerationEvent,
@@ -11,7 +11,7 @@ import {
     UpdateEventProgressValue,
     WorkerEventProcessor,
 } from "../../../learn";
-import { ILearnWorker } from "../../../learn/ILearnWorker";
+import { LearnWorker } from "../../../worker";
 import { SnakeLearnSettings } from "./SnakeLearnSettings";
 import { PhenotypeInfo } from "./SnakeLearnWorker";
 
@@ -27,8 +27,8 @@ export class SnakeLearnService
         settings: SnakeLearnSettings,
         processor: WorkerEventProcessor<PhenotypeInfo, IndividualInfo>): StopLearn {
         const worker = new Worker();
-        const proxy = Comlink.wrap<ILearnWorker<SnakeLearnSettings, PhenotypeInfo, IndividualInfo>>(worker);
-        proxy.runLearning(settings, Comlink.proxy(processor));
+        const proxy = Comlink.wrap<LearnWorker>(worker);
+        proxy.snake(settings, Comlink.proxy(processor));
 
         return () => proxy[Comlink.releaseProxy]();
     }
