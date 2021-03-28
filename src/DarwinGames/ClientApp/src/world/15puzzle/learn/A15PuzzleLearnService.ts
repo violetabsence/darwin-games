@@ -30,7 +30,7 @@ export class A15PuzzleLearnService
         const proxy = Comlink.wrap<LearnWorker>(worker);
         proxy.a15puzzle(settings, Comlink.proxy(processor));
 
-        return () => proxy[Comlink.releaseProxy]();
+        return () => worker.terminate();
     }
 
     protected mapGeneration(event: GenerationEvent<PhenotypeInfo, IndividualInfo>, final: boolean)
