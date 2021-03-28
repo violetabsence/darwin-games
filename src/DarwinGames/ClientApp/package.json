@@ -5,11 +5,13 @@
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
+    "comlink": "^4.3.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "^4.0.3",
     "rxjs": "^6.6.6",
-    "synaptic": "^1.1.4"
+    "synaptic": "^1.1.4",
+    "worker-loader": "^3.0.8"
   },
   "devDependencies": {
     "@types/react": "^17.0.1",
