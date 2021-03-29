@@ -11,7 +11,7 @@ import { problemPerGeneration } from "../../../genetic/operators/problem";
 import { simpleSelection } from "../../../genetic/operators/selection";
 import { simpleTerminationCriteria } from "../../../genetic/operators/termination";
 import { getOrAwait } from "../../../genetic/utils";
-import { Field, ISnakeGame } from "../game";
+import { Field, ISnakeGame, ObjectType } from "../game";
 import { Direction } from "../game/Direction";
 import { Point } from "../game/Point";
 import { SnakeGame } from "../game/SnakeGame";
@@ -21,10 +21,14 @@ export type Phenotype = {
     initialState: Field,
     game: ISnakeGame,
     moves: Direction[],
+    emptyMovesCount: number,
     lose: boolean,
 };
 
 export type Individual = IIndividual<number, number, PNC>;
+
+const SightDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
+type SightDirection = typeof SightDirections[number];
 
 export const learn = async (
     settings: SnakeLearnSettings,
@@ -32,12 +36,11 @@ export const learn = async (
     const { maxGenerationCount, populationSize, maxAge, puzzleWidth: w, puzzleHeight: h } = settings;
     const tileCount = w * h;
 
-    const inputNeurons = 4;
-    const hiddenLayersNeurons = [20, 14];
+    const inputNeurons = 16;
+    const hiddenLayersNeurons = [32, 16];
     const outputNeurons = 4;
 
-    const maxMoveCount = tileCount * 30;
-    const solutionFitnessNotRaisedThreshold = tileCount * 5;
+    const solutionFitnessNotRaisedThreshold = tileCount;
 
     const randomPerPopulationCount = 1;
     const parentToOffspringRate = 0.5;
@@ -63,27 +66,41 @@ export const learn = async (
     };
 
     const fitness = (problem: Phenotype): number => {
-        let fitness = problem.game.snake.segments.length;
-        const moveFitness = 1 - (problem.moves.length / maxMoveCount);
-        fitness += moveFitness;
-
-        if (problem.lose) {
-            fitness -= tileCount / 2;
-        }
-
-        return fitness;
+        return problem.game.snake.segments.length + 1 / (problem.emptyMovesCount || 1);
     };
 
     const translateInput = (input: ISnakeGame): number[] => {
-        const getDistance = (from: Point, to: Point) => ([
-            from.y >= to.y ? 0 : (to.y - from.y) / input.field.size.h,
-            from.x >= to.x ? 0 : (to.x - from.x) / input.field.size.w,
-            from.y <= to.y ? 0 : (from.y - to.y) / input.field.size.h,
-            from.x <= to.x ? 0 : (from.x - to.x) / input.field.size.w,
-        ]);
+        const getShift = (dir: SightDirection): Point => {
+            switch (dir) {
+                case "N": return { x: 0, y: -1 };
+                case "NE": return { x: 1, y: -1 };
+                case "E": return { x: 1, y: 0 };
+                case "SE": return { x: 1, y: 1 };
+                case "S": return { x: 0, y: 1 };
+                case "SW": return { x: -1, y: 1 };
+                case "W": return { x: -1, y: 0 };
+                case "NW": return { x: -1, y: -1 };
+            }
+        };
 
-        const distanceToFood = getDistance(input.snake, input.field.food);
-        return [...distanceToFood];
+        const getDistance = (direction: SightDirection, ...objects: ObjectType[]) => {
+            const shift = getShift(direction);
+            const cur: Point = { x: input.snake.x, y: input.snake.y };
+            let obj: ObjectType = "none";
+            let distance = -1;
+            while (obj !== "void" && objects.indexOf(obj) === -1) {
+                distance++;
+                cur.x += shift.x;
+                cur.y += shift.y;
+                obj = input.getObject(cur);
+            }
+
+            return objects.indexOf("void") === -1 && obj === "void" ? -1 : distance;
+        };
+
+        const toObstacles = SightDirections.map((d) => getDistance(d, "snake", "void"));
+        const toFood = SightDirections.map((d) => getDistance(d, "food"));
+        return [...toObstacles, ...toFood];
     };
 
     const translateOutput = (output: number[]): Direction => {
@@ -102,16 +119,16 @@ export const learn = async (
         let currentFitness = fitness(problem);
         let fitnessNotRaisedTimes = 0;
 
-        while (!problem.lose
-            && problem.moves.length < maxMoveCount
-            && fitnessNotRaisedTimes < solutionFitnessNotRaisedThreshold) {
+        while (!problem.lose && fitnessNotRaisedTimes < solutionFitnessNotRaisedThreshold) {
             const input = translateInput(problem.game);
             const output = network.activate(input);
             const fromDirection = translateOutput(output);
             problem.moves.push(fromDirection);
 
             problem.game.setDirection(fromDirection);
-            problem.game.move();
+            const obj = problem.game.move();
+            problem.emptyMovesCount = obj === "food" ? 0 : problem.emptyMovesCount + 1;
+
             problem.lose = problem.game.state === "lose";
 
             const newFitness = fitness(problem);
@@ -130,6 +147,7 @@ export const learn = async (
                 initialState: { ...game.field },
                 game,
                 moves: [],
+                emptyMovesCount: 0,
                 lose: false,
             };
         },

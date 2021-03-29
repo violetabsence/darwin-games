@@ -10,7 +10,7 @@ export interface ISnakeGame {
     readonly field: Readonly<Field>;
     readonly state: SnakeGameState;
     setDirection: (direction: Direction) => void;
-    move: () => void;
+    move: () => ObjectType;
     reset: () => void;
     getObject: (point: Point) => ObjectType;
     loadFrom: (game: ISnakeGame) => void;

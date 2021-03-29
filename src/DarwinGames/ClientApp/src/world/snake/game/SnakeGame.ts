@@ -46,8 +46,8 @@ export class SnakeGame implements ISnakeGame {
         }
     }
 
-    public move(): void {
-        if (this._state !== "play") return;
+    public move(): ObjectType {
+        if (this._state !== "play") return "void";
 
         if (this._nextDirection !== undefined) {
             this._snake.direction = this._nextDirection;
@@ -58,7 +58,7 @@ export class SnakeGame implements ISnakeGame {
         const obj = this.getObject(next);
         if (obj === "void" || obj === "snake") {
             this.setState("lose");
-            return;
+            return obj;
         }
 
         const newSegment = obj === "food" ? this._snake.segments[this._snake.segments.length - 1] : undefined;
@@ -80,6 +80,8 @@ export class SnakeGame implements ISnakeGame {
         if (this._snake.segments.length === this._field.size.w * this._field.size.h) {
             this.setState("win");
         }
+
+        return obj;
     }
 
     public reset(): void {
